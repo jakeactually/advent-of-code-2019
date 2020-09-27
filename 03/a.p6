@@ -7,7 +7,12 @@ class Line {
     has $.x2;
     has $.y2;
 
-    method from([($x1, $y1), ($x2, $y2)], $horizontal, $id) {
+    method from(@arr, $horizontal, $id) {
+        my @arr2 = @arr.sort(&manhattan);
+        
+        my ($x1, $y1) = @arr2[0];
+        my ($x2, $y2) = @arr2[1];
+
         Line.new: :x1($x1), :y1($y1), :x2($x2), :y2($y2), :horizontal($horizontal), :id($id)
     }
 
@@ -16,9 +21,10 @@ class Line {
     }
 }
 
-sub manhattan($x, $y) {
+sub manhattan((Int $x, Int $y)) {
     abs($x) + abs($y)
 }
+
 
 my (@a, @b) := slurp('input.txt').lines.map: *.split(',');
 
@@ -42,7 +48,7 @@ my @lines = gather {
             
             my $horizontal = $dir eq 'R' || $dir eq 'L';
 
-            take Line.from: [($x1, $y1), ($x2, $y2)].sort(&manhattan), $horizontal, $id;
+            take Line.from: [($x1, $y1), ($x2, $y2)], $horizontal, $id;
         }
     }
 };
