@@ -1,41 +1,68 @@
-my (@a, @b) := slurp('input.txt').lines.map: *.split(',');
+class Line {
+    has $.id;
+    has $.horizontal;
 
-my @arr = [0 xx 10000] xx 10000;
+    has $.x1;
+    has $.y1;
+    has $.x2;
+    has $.y2;
 
-my ($x, $y) = (5000, 5000);
+    method from([($x1, $y1), ($x2, $y2)], $horizontal, $id) {
+        Line.new: :x1($x1), :y1($y1), :x2($x2), :y2($y2), :horizontal($horizontal), :id($id)
+    }
 
-for @a {
-    my $walk = $_ ~~ /(<[RLUD]>)(\d+)/;
-
-    for 1..$walk[1] {
-        given $walk[0] {
-            $x++ when 'R';
-            $x-- when 'L';
-            $y-- when 'U';
-            $y++ when 'D';
-        }
-
-        @arr[$y][$x] = 1;
+    method manhattan {
+        abs($.x1) + abs($.y1)
     }
 }
 
-($x, $y) = (5000, 5000);
+sub manhattan($x, $y) {
+    abs($x) + abs($y)
+}
 
-for @b {
-    my $walk = $_ ~~ /(<[RLUD]>)(\d+)/;
+my (@a, @b) := slurp('input.txt').lines.map: *.split(',');
 
-    for 1..$walk[1] {
-        given $walk[0] {
-            $x++ when 'R';
-            $x-- when 'L';
-            $y-- when 'U';
-            $y++ when 'D';
+my ($x, $y) = (0, 0);
+
+my @lines = gather {
+    for [(@a, 1), (@b, 2)] -> (@arr, $id) {
+        for @arr {
+            my ($x1, $y1) = ($x, $y); 
+
+            my ($dir, $num) := $_ ~~ /(<[RLUD]>)(\d+)/;
+            
+            given $dir {
+                $x -= $num when 'R';
+                $x += $num when 'L';
+                $y -= $num when 'U';
+                $y += $num when 'D';
+            }
+                
+            my ($x2, $y2) = ($x, $y);
+            
+            my $horizontal = $dir eq 'R' || $dir eq 'L';
+
+            take Line.from: [($x1, $y1), ($x2, $y2)].sort(&manhattan), $horizontal, $id;
         }
+    }
+};
 
-        if @arr[$y][$x] == 1 {
-            say (abs($x - 5000) + abs($y - 5000));
+my @sorted = @lines.sort: *.manhattan;
+
+for 0..@sorted.elems - 2 {
+    my $a = @sorted[$_];
+    my $b = @sorted[$_ + 1];
+
+
+    if $a.horizontal {
+        if $a.y1 > $b.y1 && $a.y1 < $b.y2 && $b.x1 > $a.x1 && $b.x1 < $a.x2 {
+            say ($a, $b);
         }
+    }
 
-        @arr[$y][$x] = 2;
+    if $b.horizontal {
+        if $b.y1 > $a.y1 && $b.y1 < $a.y2 && $a.x1 > $b.x1 && $a.x1 < $b.x2 {
+            say ($a, $b);
+        }
     }
 }
