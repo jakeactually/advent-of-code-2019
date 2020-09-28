@@ -74,9 +74,9 @@ for @lines.combinations(2) -> ($l1, $l2) {
     my $intersect = $a.inY($b) && $b.inX($a);
 
     if $intersect {
-        #say ($a, $b);
-        #say ($b.x1, $a.y1);
-        #say manhattan(($b.p1.x, $a.p1.y));
-        say ($a.steps + $b.steps);
+        my $diff_x = abs(abs($a.p1.x) - abs($b.p1.x));
+        my $diff_y = abs(abs($a.p1.y) - abs($b.p1.y));
+
+        say ($a.steps + $b.steps + $diff_x + $diff_y);
     }
 }
