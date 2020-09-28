@@ -1,18 +1,28 @@
+class Point {
+    has $.x;
+    has $.y;
+
+    method from((Int $x, Int $y)) {
+        Point.new: :$x, :$y
+    }
+}
+
 class Line {
     has $.id;
     has $.horizontal;
+    has $.p1;
+    has $.p2;
 
-    has $.x1;
-    has $.y1;
-    has $.x2;
-    has $.y2;
-
-    method from([($x1, $y1), ($x2, $y2)], $horizontal, $id) {
-        Line.new: :$x1, :$y1, :$x2, :$y2, :$horizontal, :$id
+    method from([$p1, $p2], $horizontal, $id) {
+        Line.new: :p1(Point.from($p1)), :p2(Point.from($p2)), :$horizontal, :$id
     }
 
-    method manhattan {
-        abs($.x1) + abs($.y1)
+    method inY(Line $l) {
+        $.p1.y > min($l.p1.y, $l.p2.y) && $.p1.y < max($l.p1.y, $l.p2.y)
+    }
+
+    method inX(Line $l) {
+        $.p1.x > min($l.p1.x, $l.p2.x) && $.p1.x < max($l.p1.x, $l.p2.x)
     }
 }
 
@@ -56,13 +66,11 @@ for @lines.combinations(2) -> ($l1, $l2) {
 
     my ($a, $b) = (if $l1.horizontal { ($l1, $l2) } else { ($l2, $l1) });
 
-    my $intersect =
-        ($a.y1 > min($b.y1, $b.y2) && $a.y1 < max($b.y1, $b.y2)) &&
-        ($b.x1 > min($a.x1, $a.x2) && $b.x1 < max($a.x1, $a.x2));
+    my $intersect = $a.inY($b) && $b.inX($a);
 
     if $intersect {
         #say ($a, $b);
         #say ($b.x1, $a.y1);
-        say manhattan(($b.x1, $a.y1));
+        say manhattan(($b.p1.x, $a.p1.y));
     }
 }
