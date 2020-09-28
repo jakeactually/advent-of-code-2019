@@ -70,7 +70,7 @@ for @lines.combinations(2) -> ($l1, $l2) {
 
     if $intersect {
         #say ($a, $b);
-        #say ($b.x1, $a.y1);
+        #say ($b.p1.x, $a.p1.y);
         say manhattan(($b.p1.x, $a.p1.y));
     }
 }
