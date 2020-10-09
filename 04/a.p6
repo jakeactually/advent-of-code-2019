@@ -1,15 +1,26 @@
-my $count = 0;
+my @ins = slurp('input.txt') ~~ m:g/\d* <[12]> \,\-?\d+\,\-?\d+\,\-?\d+ | \d* <[34]> \,\-?\d+/;
 
-for 254032..789860 {
-    my @digits = .split('', :skip-empty);
-    my ($double, $increase) = (False, True);
+.Str.say for @ins; exit;
 
-    for 0..@digits.elems - 2 {
-        $increase = False if @digits[$_] > @digits[$_ + 1];
-        $double = True if @digits[$_] == @digits[$_ + 1];
+my %ctx := {};
+
+for @ins  {
+    my ($modes, $a, $b, $c) = $_.split(',');
+
+    $b ||= 0;
+    $c ||= 0;
+
+    my ($mc, $mb, $ma, $m_, $op) = sprintf('%05d', $modes).split('', :skip-empty);
+
+    my $ta = (if $ma == 0 { %ctx{$a} || 0 } else { $a });
+    my $tb = (if $mb == 0 { %ctx{$b} || 0 } else { $b });
+
+    given $op {
+        %ctx{$c} = $ta + $tb when 1;
+        %ctx{$c} = $ta * $tb when 2;
+        %ctx{$a} = prompt("Enter input: ") when 3;
+        say $ta when 4;
     }
-
-    $count++ if $double && $increase;
 }
 
-say $count;
+say %ctx;
