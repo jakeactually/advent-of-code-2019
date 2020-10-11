@@ -1,27 +1,40 @@
-my @input = slurp('input.txt').split(',');
+my @arr = slurp('input.txt').split(',');
+my $ip = 0;
 
-for 0..100 -> $i {
-    for 0..100 -> $j {
-        my @arr = @input.clone;
+loop {
+    my $modes = @arr[$ip];
+    my ($mc, $mb, $ma, $op1, $op2) = sprintf('%05d', $modes).split('', :skip-empty);
+    my $op = $op1 ~ $op2;
 
-        @arr[1] = $i;
-        @arr[2] = $j;
+    my $size = (given $op {
+        when $_ == 99 { 1 }
+        when $_ == (3, 4).any { 2 }
+        when $_ == (5, 6).any { 3 }
+        when $_ == (1, 2, 7, 8).any { 4 }
+    });
 
-        for 0..@arr.elems / 4  {
-            my ($a, $b, $c, $d) = @arr[$_*4..$_*4+3];
-            
-            given $a {
-                @arr[$d] = @arr[$b] + @arr[$c] when 1;
-                @arr[$d] = @arr[$b] * @arr[$c] when 2;
-                last when $a > 2;
-            }
-        }
+    my ($m, $a, $b, $c) = @arr[$ip..^$ip + $size];
 
-        say @arr[0];
+    # dummies
+    $a ||= 0;
+    $b ||= 0;
+    
+    my $ta = (if $ma == 0 { @arr[$a] } else { $a });
+    my $tb = (if $mb == 0 { @arr[$b] } else { $b });
 
-        if @arr[0] == 19690720 {
-            say (100 * $i + $j);
-            exit;
-        }
+    my $pip = $ip;
+
+    given $op {
+        @arr[$c] = $ta + $tb when 1;
+        @arr[$c] = $ta * $tb when 2;
+        @arr[$a] = prompt("Enter input: ") when 3;
+        say $ta when 4;
+        $ip = $tb when $_ == 5 && $ta != 0;
+        $ip = $tb when $_ == 6 && $ta == 0;
+        @arr[$c] = ($ta < $tb).Int when 7;
+        @arr[$c] = ($ta == $tb).Int when 8;
+        last when 99;
     }
+
+    $ip += $size if $pip == $ip;
 }
