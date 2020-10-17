@@ -1,26 +1,15 @@
-my @arr = slurp('input.txt').split(',');
-my $ip = 0;
+my $count = 0;
 
-loop {
-    my $modes = @arr[$ip];
-    my ($mc, $mb, $ma, $op1, $op2) = sprintf('%05d', $modes).split('', :skip-empty);
-    my $op = $op1 ~ $op2;
+for 254032..789860 {
+    my @digits = .split('', :skip-empty);
+    my ($double, $increase) = (False, True);
 
-    my $size = (if $op == 1 || $op == 2 { 4 } else { 2 });
-    my ($m, $a, $b, $c) = @arr[$ip..^$ip + $size];
-    
-    $b ||= 0; # dummy
-    
-    my $ta = (if $ma == 0 { @arr[$a] } else { $a });
-    my $tb = (if $mb == 0 { @arr[$b] } else { $b });
-
-    given $op {
-        @arr[$c] = $ta + $tb when 1;
-        @arr[$c] = $ta * $tb when 2;
-        @arr[$a] = prompt("Enter input: ") when 3;
-        say $ta when 4;
-        last when 99;
+    for 0..@digits.elems - 2 {
+        $increase = False if @digits[$_] > @digits[$_ + 1];
+        $double = True if @digits[$_] == @digits[$_ + 1];
     }
 
-    $ip += $size;
+    $count++ if $double && $increase;
 }
+
+say $count;
