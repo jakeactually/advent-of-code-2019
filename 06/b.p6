@@ -1,14 +1,28 @@
-my %g := {};
+my @g := [];
 
 for open("input.txt").lines {
     my ($a, $b) = .split(")");
-    %g{'a'} ||= [];
-    %g{$a}.push($b);
+    @g.push([$a, $b]);
+    @g.push([$b, $a]);
 }
 
-sub value($node, $level) {
-    my @children := %g{$node} || [];
-    @children.elems * $level + @children.map({ value($_, $level + 1) }).sum
+sub out($node) {
+    @g.grep(*[0] eq $node)
 }
 
-say value("COM", 1);
+my @ws = ["YOU"];
+my %visited = "YOU" => True;
+
+for 1..* {
+    say @ws;
+
+    @ws = @ws.flatmap(&out)>>[1].grep({ ! %visited{$_} });
+    %visited (|)= @ws;
+
+    if @ws.any eq "SAN" {
+        .say;
+        last;
+    }
+}
+
+say @g;
