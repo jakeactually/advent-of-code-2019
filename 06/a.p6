@@ -2,7 +2,6 @@ my %g := {};
 
 for open("input.txt").lines {
     my ($a, $b) = .split(")");
-    %g{'a'} ||= [];
     %g{$a}.push($b);
 }
 
