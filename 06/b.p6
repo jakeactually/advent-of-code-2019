@@ -14,7 +14,7 @@ my @ws = ["YOU"];
 my %visited = "YOU" => True;
 
 for 1..* {
-    say @ws;
+    # say @ws;
 
     @ws = @ws.flatmap(&out)>>[1].grep({ ! %visited{$_} });
     %visited (|)= @ws;
@@ -24,5 +24,3 @@ for 1..* {
         last;
     }
 }
-
-say @g;
