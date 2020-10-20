@@ -1,16 +1,10 @@
-my @arr = slurp('input.txt').split(',');
+use lib "..";
+use Cpu;
 
-@arr[1] = 12;
-@arr[2] = 2;
+my $cpu = Cpu.from_file("input.txt", {0}, -> {});
 
-for 0..@arr.elems / 4  {
-    my ($a, $b, $c, $d) = @arr[$_*4..$_*4+3];
-    
-    given $a {
-        @arr[$d] = @arr[$b] + @arr[$c] when 1;
-        @arr[$d] = @arr[$b] * @arr[$c] when 2;
-        last when $a > 2;
-    }
-}
+$cpu.memory[1] = 12;
+$cpu.memory[2] = 2;
+$cpu.run;
 
-say @arr[0];
+say $cpu.memory[0];

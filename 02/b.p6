@@ -1,25 +1,17 @@
-my @input = slurp('input.txt').split(',');
+use lib "..";
+use Cpu;
 
 for 0..100 -> $i {
     for 0..100 -> $j {
-        my @arr = @input.clone;
+        my $cpu = Cpu.from_file("input.txt", {0}, -> {});
 
-        @arr[1] = $i;
-        @arr[2] = $j;
+        $cpu.memory[1] = $i;
+        $cpu.memory[2] = $j;
+        $cpu.run;
 
-        for 0..@arr.elems / 4  {
-            my ($a, $b, $c, $d) = @arr[$_*4..$_*4+3];
-            
-            given $a {
-                @arr[$d] = @arr[$b] + @arr[$c] when 1;
-                @arr[$d] = @arr[$b] * @arr[$c] when 2;
-                last when $a > 2;
-            }
-        }
+        say $cpu.memory[0];
 
-        say @arr[0];
-
-        if @arr[0] == 19690720 {
+        if $cpu.memory[0] == 19690720 {
             say (100 * $i + $j);
             exit;
         }
