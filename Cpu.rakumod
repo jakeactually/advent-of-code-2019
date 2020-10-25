@@ -3,8 +3,10 @@ unit module Intcode;
 class Cpu is export {
     has Int @.memory;
     has Int $!ip = 0;
-    has &.input;
-    has &.output;
+    has &.input is rw;
+    has &.output is rw;
+    has Bool $!running = True;
+    has Bool $!active = True;
 
     method create(Int @memory, &input, &output --> Cpu) {
         Cpu.new: :@memory, :&input, :&output
@@ -15,8 +17,18 @@ class Cpu is export {
         self.create(Array[Int].new(@data), &input, &output)
     }
 
+    method halt {
+        $!running = False;
+    }
+
+    method get_ip {
+        $!ip
+    }
+
     method run {
-        loop {
+        $!running = True;
+
+        while $!running && $!active {
             my $modes = @.memory[$!ip];
             my ($mc, $mb, $ma, $op1, $op2) = sprintf("%05d", $modes).split("", :skip-empty);
             my $op = $op1 ~ $op2;
@@ -37,7 +49,7 @@ class Cpu is export {
             my $ta = (if $ma == 0 { @.memory[$a] } else { $a });
             my $tb = (if $mb == 0 { @.memory[$b] } else { $b });
 
-            my $pip = $!ip;
+            $!ip += $size;
 
             given $op {
                 @.memory[$c] = $ta + $tb when 1;
@@ -48,10 +60,12 @@ class Cpu is export {
                 $!ip = $tb when $_ == 6 && $ta == 0;
                 @.memory[$c] = ($ta < $tb).Int when 7;
                 @.memory[$c] = ($ta == $tb).Int when 8;
-                last when 99;
-            }
 
-            $!ip += $size if $pip == $!ip;
+                when 99 {
+                    $!active = False;
+                    last;
+                }
+            }
         }
     }
 }
