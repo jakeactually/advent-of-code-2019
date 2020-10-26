@@ -3,6 +3,7 @@ unit module Intcode;
 class Cpu is export {
     has Int @.memory;
     has Int $!ip = 0;
+    has Int $!rb = 0;
     has &.input is rw;
     has &.output is rw;
     has Bool $!running = True;
@@ -25,6 +26,10 @@ class Cpu is export {
         $!ip
     }
 
+    method alloc(Int $n) {
+        @.memory.append(0 xx $n)
+    }
+
     method run {
         $!running = True;
 
@@ -35,7 +40,7 @@ class Cpu is export {
 
             my $size = (given $op {
                 when $_ == 99 { 1 }
-                when $_ == (3, 4).any { 2 }
+                when $_ == (3, 4, 9).any { 2 }
                 when $_ == (5, 6).any { 3 }
                 when $_ == (1, 2, 7, 8).any { 4 }
             });
@@ -45,21 +50,27 @@ class Cpu is export {
             # dummies
             $a ||= 0;
             $b ||= 0;
+            $c ||= 0;
             
-            my $ta = (if $ma == 0 { @.memory[$a] } else { $a });
-            my $tb = (if $mb == 0 { @.memory[$b] } else { $b });
+            my $ta = (if $ma == 0 { @.memory[$a] } elsif $ma == 1 { $a } else { @.memory[$!rb + $a] });
+            my $tb = (if $mb == 0 { @.memory[$b] } elsif $mb == 1 { $b } else { @.memory[$!rb + $b] });
+            my $tc = (if $mc == 0 { @.memory[$c] } elsif $mc == 1 { $c } else { @.memory[$!rb + $c] });
+            my $ia = (if $ma == 0 { $a } else { $!rb + $a });
+            my $ib = (if $mb == 0 { $b } else { $!rb + $b });
+            my $ic = (if $mc == 0 { $c } else { $!rb + $c });
 
             $!ip += $size;
 
             given $op {
-                @.memory[$c] = $ta + $tb when 1;
-                @.memory[$c] = $ta * $tb when 2;
-                @.memory[$a] = &.input.() when 3;
+                @.memory[$ic] = $ta + $tb when 1;
+                @.memory[$ic] = $ta * $tb when 2;
+                @.memory[$ia] = &.input.() when 3;
                 &.output.($ta) when 4;
                 $!ip = $tb when $_ == 5 && $ta != 0;
                 $!ip = $tb when $_ == 6 && $ta == 0;
-                @.memory[$c] = ($ta < $tb).Int when 7;
-                @.memory[$c] = ($ta == $tb).Int when 8;
+                @.memory[$ic] = ($ta < $tb).Int when 7;
+                @.memory[$ic] = ($ta == $tb).Int when 8;
+                $!rb += $ta when 9;
 
                 when 99 {
                     $!active = False;
