@@ -1,7 +1,5 @@
 my @arr = open('input.txt').lines>>.split('', :skip-empty)>>.Array;
-
 my $hashes = @arr>>.list.flat.grep("#").elems;
-
 my $h = @arr.elems;
 my $w = @arr[0].elems;
 
@@ -14,10 +12,12 @@ class Vec {
     }
 
     method norm {
-        return self if $.x == 0 || $.y == 0;
-
-        my $gcd = $.x gcd $.y;
-        Vec.new: :x($.x div $gcd), :y($.y div $gcd)
+        if $.x == 0 || $.y == 0 {
+            Vec.new: :x($.x.sign), :y($.y.sign)
+        } else {
+            my $gcd = $.x gcd $.y;
+            Vec.new: :x($.x div $gcd), :y($.y div $gcd)
+        }
     }
 }
 
@@ -36,6 +36,9 @@ sub infix:<same>(Vec $v1, Vec $v2 --> Bool) {
 sub infix:<diff>(Vec $v1, Vec $v2 --> Bool) {
     $v1.x != $v2.x || $v1.y != $v2.y
 }
+
+my $max = 0;
+my $max_v = Vec.from(0, 0);
 
 for 0..^$h X 0..^$w -> ($y1, $x1) {
     next if @arr[$y1][$x1] ne '#';
@@ -58,7 +61,6 @@ for 0..^$h X 0..^$w -> ($y1, $x1) {
         my $collision = False;
 
         repeat {
-            say ($center, $asteroid, $norm);
             $asteroid = $asteroid plus $norm;
             $collision = True if @arr[$asteroid.y][$asteroid.x] eq '#' && $center diff $asteroid;
         } while $center diff $asteroid;
@@ -66,5 +68,11 @@ for 0..^$h X 0..^$w -> ($y1, $x1) {
         $count++ if not $collision;
     }
 
-    say $count;
+    if $count > $max {
+        $max = $count;
+        $max_v = Vec.from($x1, $y1);
+    }
 }
+
+say $max;
+say $max_v;
