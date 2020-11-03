@@ -39,7 +39,7 @@ $cpu.run;
 
 for @grid {
     say $_.map({
-        when 0 { ' '}
+        when 0 { ' ' }
         when 1 { '#' }
     });
 }
