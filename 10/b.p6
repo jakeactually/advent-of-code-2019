@@ -45,17 +45,17 @@ sub infix:<diff>(Vec $v1, Vec $v2 --> Bool) {
     $v1.x != $v2.x || $v1.y != $v2.y
 }
 
-#my $station = Vec.from(28, 29);
-my $station = Vec.from(5, 5);
+my $station = Vec.from(28, 29);
 
 my @vecs = (0..^$h X 0..^$w)
     .grep(-> ($y, $x) { @arr[$y][$x] eq '#' })
     .map(-> ($y, $x) { Vec.from($x, $y) minus $station });
 
 my @data = @vecs.classify(*.norm).pairs
-    #.map({ $_.key => $_.value.sort(*.manhathan) })
-    .map({ atan2($_.key.y, $_.key.x) * 360 / pi });
+    .map({ $_.key => $_.value.sort(*.manhathan).Array })
+    .sort({ (atan2($_.key.y, $_.key.x) * 360 / pi / 2 + 450) % 360 });
 
-for @data {
-    .say;
+for 0..200 {
+    @data.splice($_ % @data.elems) if @data[$_ % @data.elems].value.elems == 0;
+    say @data[$_ % @data.elems].value.shift plus $station;
 }
