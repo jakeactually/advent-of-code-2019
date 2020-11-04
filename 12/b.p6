@@ -33,9 +33,11 @@ sub infix:<approach>(Vec $v1, Vec $v2) {
 }
 
 my ($a, $b, $c, $d) = open('input.txt').lines.map({ Vec.parse($_) });
+my ($sa, $sb, $sc, $sd) = ($a, $b, $c, $d);
 my ($va, $vb, $vc, $vd) = Vec.from(0, 0, 0) xx 4;
+my ($rx, $ry, $rz) = (0, 0, 0);
 
-for 0..^1000 {
+for 0..* {
     $va = $va plus ($a force $b) plus ($a force $c) plus ($a force $d);
     $vb = $vb plus ($b force $c) plus ($b force $d) plus ($b force $a);
     $vc = $vc plus ($c force $d) plus ($c force $a) plus ($c force $b);
@@ -45,10 +47,13 @@ for 0..^1000 {
     $b = $b plus $vb;
     $c = $c plus $vc;
     $d = $d plus $vd;
-}
 
-say
-    $a.manhathan * $va.manhathan +
-    $b.manhathan * $vb.manhathan +
-    $c.manhathan * $vc.manhathan +
-    $d.manhathan * $vd.manhathan;
+    $rx = $_ if $rx == 0 && $a.x == $sa.x && $b.x == $sb.x && $c.x == $sc.x && $d.x == $sd.x;
+    $ry = $_ if $ry == 0 && $a.y == $sa.y && $b.y == $sb.y && $c.y == $sc.y && $d.y == $sd.y;
+    $rz = $_ if $rz == 0 && $a.z == $sa.z && $b.z == $sb.z && $c.z == $sc.z && $d.z == $sd.z;
+
+    if $rx != 0 && $ry != 0 && $rz != 0 {
+        say (($rx + 2) lcm ($ry + 2) lcm ($rz + 2));
+        last;
+    }
+}
