@@ -15,14 +15,12 @@ for open('input.txt').lines {
     @data.push: Mol.parse($k) => $v.split(", ").map({ Mol.parse($_) });
 }
 
-sub out(Mol $c) {
-    my $reaction = @data.first({
-        .key.kind eq $c.kind && .key.amount % $c.amount == 0
-    });
+my %req := {};
 
-    $reaction.value.map: { $_ xx ($reaction.key.amount div .amount) }
+for @data {
+    for .value {
+        %req{.kind} += .amount;
+    }
 }
 
-my $start = Mol.new: :kind("FUEL"), :amount(1);
-
-say out($start);
+say %req;
