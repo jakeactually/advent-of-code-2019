@@ -18,6 +18,10 @@ class Cpu is export {
         self.create(Array[Int].new(@data), &input, &output)
     }
 
+    method from_array(Int @data, &input, &output --> Cpu) {
+        self.create(Array[Int].new(@data), &input, &output)
+    }
+
     method halt {
         $!running = False;
     }
