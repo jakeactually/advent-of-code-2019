@@ -41,7 +41,6 @@ for 0..^@arr.elems -> $y {
     }
 }
 
-#%graph{"@"} = %graph{"@"}.rotor(2)>>[0].Array;
 my $keys = %graph.keys.grep(/<[a..z]>/).elems;
 my %set;
 
@@ -91,7 +90,7 @@ loop {
     %walkers{$min.key}:delete;
 
     my @out = wout($min.value);
-    next if (!@out.elems);
+    next if !@out.elems;
     say @out>>.to_string;
 
     if @out.any.keys.elems >= $keys {
